@@ -12,6 +12,13 @@ public class TVMazeAPIAdapter {
     private static final String BASE_URL = "http://api.tvmaze.com/";
     private static final String DELIMITER_FIRST = "?";
     private static final String DELIMITER_SUBSEQUENT = "&";
+    
+    // OPTIONS API
+    public static final String OPTION_SCHEDULE = "schedule";
+    public static final String OPTION_SEARCH = "search";
+    public static final String OPTION_SHOWS = "show";
+    public static final String OPTION_PEOPLE = "people";
+    
 	
     private final HttpClient httpClient;
     
@@ -21,8 +28,8 @@ public class TVMazeAPIAdapter {
     }
 	
     
-    private String getSchedule() {
-    	final HttpGet httpGet = new HttpGet(new URL(BASE_URL+"schedule").toURI());
+    private String get(String request) {
+    	final HttpGet httpGet = new HttpGet(new URL(BASE_URL+request).toURI());
     	httpGet.addHeader("accept", "application/json");
     	
     	final DigestedResponse response = DigestedResponseReader.requestContent(httpClient, httpGet, charset);

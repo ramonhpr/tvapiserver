@@ -5,9 +5,16 @@ public class Server {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		TVMazeAPIAdapter adapter = new TVMazeAPIAdapter();
-		String list = adapter.getSchedule();
-		get("/hello", (req, res) -> list);
-
+		
+		path("/search", () -> {
+			get("/show/:name", (req, res) -> 		adapter.getSearchShow(req.params(":name")));
+			get("/people/:name", (req, res) -> 	adapter.getSearchPeople(req.params(":name")));
+		});
+		
+		path("/shows", () -> {
+			get("", (req, res) -> 		adapter.getShows());
+			get("/:id", (req, res) -> 	adapter.getShow(req.params(":id")));
+		});
 	}
 
 }

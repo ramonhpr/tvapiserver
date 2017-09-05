@@ -1,8 +1,8 @@
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -16,8 +16,7 @@ public class TVMazeAPIAdapter {
     private static final int HTTP_STATUS_500 = 500;
     private static final String DEFAULT_CHARSET = "UTF-8";
     private static final String BASE_URL = "http://api.tvmaze.com/";
-    private static final String DELIMITER_FIRST = "?";
-    private static final String DELIMITER_SUBSEQUENT = "&";
+
     private final Charset charset;
 	
     private final HttpClient httpClient;
@@ -27,13 +26,12 @@ public class TVMazeAPIAdapter {
         this.charset = Charset.forName(DEFAULT_CHARSET);
     }
 	
-    
-    public String getSchedule() {
+    private String getResponse(HttpGet httpGet)
+    {
     	DigestedResponse response = null;
 		try {
-			HttpGet httpGet = new HttpGet(new URL(BASE_URL+"schedule").toURI());
-			httpGet.addHeader("accept", "application/json");
 			
+			httpGet.addHeader("accept", "application/json");
 			
 			response = DigestedResponseReader.requestContent(httpClient, httpGet, charset);
 			if (response.getStatusCode() >= HTTP_STATUS_500) {
@@ -41,14 +39,59 @@ public class TVMazeAPIAdapter {
 	    	} else if (response.getStatusCode() >= HTTP_STATUS_300) {
 	    		System.out.println("deu erro 300");
 	    	}
+			return response.getContent();
 			
-		} catch (URISyntaxException | IOException e1) {
+		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		return response.getContent();
-    	
-    	
+		return "";
     }
+    
+    
+    public String getSearchShow(String query) {
+    	HttpGet httpGet = null;
+		try {
+			httpGet = new HttpGet(new URL(BASE_URL+"/search/shows?q=:"+query).toURI());
+		} catch (MalformedURLException | URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return getResponse(httpGet);
+    }
+    
+    public String getSearchPeople(String query) {
+    	HttpGet httpGet = null;
+		try {
+			httpGet = new HttpGet(new URL(BASE_URL+"/search/people?q=:"+query).toURI());
+		} catch (MalformedURLException | URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return getResponse(httpGet);
+    }
+
+	public String getShows() {
+		HttpGet httpGet = null;
+		try {
+			httpGet = new HttpGet(new URL(BASE_URL+"/shows").toURI());
+		} catch (MalformedURLException | URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return getResponse(httpGet);
+	}
+	
+	public String getShow(String id) {
+		HttpGet httpGet = null;
+		try {
+			httpGet = new HttpGet(new URL(BASE_URL+"/shows/"+id).toURI());
+		} catch (MalformedURLException | URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return getResponse(httpGet);
+	} 
 	
 }
