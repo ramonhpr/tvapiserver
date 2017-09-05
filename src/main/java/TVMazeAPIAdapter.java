@@ -6,6 +6,9 @@ import java.nio.charset.Charset;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.DigestedResponseReader;
 import org.yamj.api.common.http.SimpleHttpClientBuilder;
@@ -26,9 +29,11 @@ public class TVMazeAPIAdapter {
         this.charset = Charset.forName(DEFAULT_CHARSET);
     }
 	
-    private String getResponse(HttpGet httpGet)
+    private Object getResponse(HttpGet httpGet)
     {
     	DigestedResponse response = null;
+    	JSONArray json = null;
+    	JSONObject jsonObj = null;
 		try {
 			
 			httpGet.addHeader("accept", "application/json");
@@ -39,17 +44,24 @@ public class TVMazeAPIAdapter {
 	    	} else if (response.getStatusCode() >= HTTP_STATUS_300) {
 	    		System.out.println("deu erro 300");
 	    	}
-			return response.getContent();
+			String content = response.getContent();
+			if (content.charAt(0) == '[') {
+				json = new JSONArray(content);
+				return json;
+			} else if (content.charAt(0) == '{') {
+				jsonObj = new JSONObject(content);
+				return jsonObj;
+			}
 			
-		} catch (IOException e1) {
+		} catch (IOException | JSONException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		return "";
+		return null;
     }
     
     
-    public String getSearchShow(String query) {
+    public JSONArray getSearchShow(String query) {
     	HttpGet httpGet = null;
 		try {
 			httpGet = new HttpGet(new URL(BASE_URL+"/search/shows?q=:"+query).toURI());
@@ -57,10 +69,10 @@ public class TVMazeAPIAdapter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return getResponse(httpGet);
+		return (JSONArray) getResponse(httpGet);
     }
     
-    public String getSearchPeople(String query) {
+    public JSONArray getSearchPeople(String query) {
     	HttpGet httpGet = null;
 		try {
 			httpGet = new HttpGet(new URL(BASE_URL+"/search/people?q=:"+query).toURI());
@@ -68,10 +80,10 @@ public class TVMazeAPIAdapter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return getResponse(httpGet);
+		return (JSONArray) getResponse(httpGet);
     }
 
-	public String getShows() {
+	public JSONArray getShows() {
 		HttpGet httpGet = null;
 		try {
 			httpGet = new HttpGet(new URL(BASE_URL+"/shows").toURI());
@@ -80,10 +92,10 @@ public class TVMazeAPIAdapter {
 			e.printStackTrace();
 		}
 
-		return getResponse(httpGet);
+		return (JSONArray) getResponse(httpGet);
 	}
 	
-	public String getShow(String id) {
+	public JSONObject getShow(String id) {
 		HttpGet httpGet = null;
 		try {
 			httpGet = new HttpGet(new URL(BASE_URL+"/shows/"+id).toURI());
@@ -91,7 +103,7 @@ public class TVMazeAPIAdapter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return getResponse(httpGet);
+		return (JSONObject) getResponse(httpGet);
 	} 
 	
 }
